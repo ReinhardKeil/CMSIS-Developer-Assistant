@@ -81,12 +81,9 @@ CMSIS Developer Assistant is free to use and works in combination with:
 1. Install [Arm Keil Studio](https://marketplace.visualstudio.com/items?itemName=Arm.keil-studio-pack) and CMSIS Developer Assistant in VS Code.
 2. Open the [command palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) and run
    **CMSIS Developer Assistant: Configure Agent**.
-3. Open the [command palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) and run
-   **CMSIS Developer Assistant: Select Agent Skills**.
-4. Open an existing CMSIS solution, or start with an empty VS Code window and
-   ask the agent to create one.
-5. Describe the outcome you want and let the agent use the installed skills and
-   MCP tools.
+3. In your agent's chat window, describe the outcome you want. For example, ask
+   the agent to work with an open CMSIS solution or to create one from an empty
+   VS Code window. You can also start a [guided workflow](#choose-a-workflow).
 
 ## Supported development tasks
 
@@ -111,7 +108,7 @@ CMSIS Developer Assistant supports these embedded development activities:
 - Troubleshooting pyOCD, J-Link, debug probes, Flash programming, and Arm FVP
   sessions.
 
-For example:
+Example prompts:
 
 > Create a Blinky project for my board, build it, program the target, and stop
 > at `main`.
@@ -155,10 +152,11 @@ privacy terms.
 
 ## Help and feedback
 
-- Ask the agent, “What can I do with CMSIS Developer Assistant?” to use the
-  `/cmsis-help` skill.
+- Enter in the agent chat window `/cmsis-help` or ask “What can I do with CMSIS Developer Assistant?”
 - Report problems and request features in
   [GitHub Issues](https://github.com/Open-CMSIS-Pack/CMSIS-Developer-Assistant/issues).
+- Use **CMSIS Developer Assistant: Copy Recent Problems** to collect relevant
+  errors and warnings when reporting a problem.
 - See [CHANGELOG.md](CHANGELOG.md) for release notes.
 - Report security vulnerabilities as described in
   [SECURITY.md](SECURITY.md).
@@ -171,8 +169,7 @@ and type **CMSIS Developer Assistant** to find them.
 
 | Command | What it does |
 |---------|--------------|
-| **Configure Agents and Skills** | Register agents, select skills, and add tool rules to agent instruction files. |
-| **Select Agent Skills** | Choose AI Skills categories or individual skills. |
+| **Configure Agent** | Register the AI agent and add tool rules to agent instruction files. |
 | **Select Target Window** | Choose which VS Code window receives agent calls, or use automatic selection. |
 | **Release Serial Port** | Return an agent-held serial port to the Serial Monitor or another application. |
 | **List Target Documentation** | List the current target's manuals, datasheets, Arm documents, and imported PDFs. |
@@ -182,15 +179,11 @@ and type **CMSIS Developer Assistant** to find them.
 | **Open Pack Docs Panel** | Inspect target documents, SVD peripherals, index state, and documentation tools. |
 | **Copy Recent Problems** | Copy recent errors and warnings, with their source and suggested next step. |
 
-The [extension setting](https://code.visualstudio.com/docs/configure/settings#_extension-settings)
-`cmsis-developer-assistant.packDocs.enabled` controls whether agents
-receive the documentation tools. The five documentation commands above remain
-available regardless of that setting. They use the built csolution to identify
-the target, or ask you to select the pack and device when it cannot be resolved.
-
 ## Choose a workflow
 
-Use a slash command in the chat window to start a guided CMSIS workflow:
+The extension automatically activates all included AI Skills. Ask the agent for
+the outcome you need, or use a slash command in the chat window to start a
+specific guided CMSIS workflow:
 
 - `/cmsis-bootstrap` — create a project from an empty VS Code window.
 - `/cmsis-project` — create, extend, or retarget a CMSIS or Zephyr project.
@@ -201,22 +194,51 @@ Use a slash command in the chat window to start a guided CMSIS workflow:
 - `/cmsis-pack` — author CMSIS-Pack debug and trace descriptions.
 - `/cmsis-help` — list the available workflows, tools, and settings.
 
-Above workflows are always available. Add optional workflows with
-**CMSIS Developer Assistant: Select Agent Skills**.
-
-### Available workflow categories
-
-Workflows combine focused AI Skills from these categories:
+This release also includes the following categories of
+[generic MCU skills from Open-CMSIS-Pack/cmsis-skills](https://github.com/Open-CMSIS-Pack/cmsis-skills/blob/main/generic-mcu-skills/README.md):
 
 | Category | What the skills cover |
 |----------|-----------------------|
 | **Project** | Create, inspect, extend, and manage CMSIS and Zephyr projects. |
-| **Bring-up** | Establish device, board, debug-access, and trace knowledge. |
 | **Debug** | Configure and verify debug, trace, and runtime analysis. |
 | **Ethos-U** | Evaluate quantized ML models across Ethos-U configurations. |
 | **Pack** | Create and update reusable CMSIS-Pack content. |
 | **DevOps** | Automate builds, tests, releases, and CI/CD workflows. |
 
-See the
-[generic MCU skills catalog](https://github.com/Open-CMSIS-Pack/cmsis-skills/blob/main/generic-mcu-skills/README.md)
-for the individual skills in each category.
+## Documentation RAG
+
+Reliable embedded development depends on the exact documentation for the
+selected device and board. Register definitions, peripheral behavior, hardware
+constraints, and errata can vary between device families and revisions. Access
+to the relevant manuals lets the AI agent ground its guidance in authoritative,
+target-specific evidence instead of relying on generic assumptions.
+
+The CMSIS Developer Assistant includes a local **retrieval-augmented generation
+(RAG)** system for querying technical documentation relevant to the current
+CMSIS target. It discovers target-specific manuals and PDFs, extracts their
+content, and indexes it for lexical search, giving additional weight to
+headings. RAG finds the most relevant passages for a question and supplies them
+to the AI agent as context, making large documentation sets practical to use.
+
+Through MCP tools, the AI agent can search and retrieve relevant documentation
+pages and CMSIS-SVD peripheral information. Because retrieval is local and
+scoped to the selected target, the system is lightweight, privacy-preserving,
+and well suited to precise queries about devices, registers, bit fields, and
+other embedded-software terminology.
+
+> [!IMPORTANT]
+>
+> Many CMSIS Device Family Packs (DFPs) and Board Support Packs (BSPs) reference
+> manuals for their devices or boards. In some cases, the CMSIS Developer
+> Assistant cannot access those documents directly.
+>
+> Use **CMSIS Developer Assistant: Open Pack Docs Panel** to see which documents are available to the AI
+> agent. If a required manual is missing, download a copy and add it with
+> **CMSIS Developer Assistant: Import Document for Current Target**.
+
+> [!WARNING]
+>
+> Disabling the
+> [`cmsis-developer-assistant.packDocs.enabled`](https://code.visualstudio.com/docs/configure/settings#_extension-settings)
+> setting removes access to documentation from the MCP tool list. The AI
+> agent can no longer access or search target documentation.
